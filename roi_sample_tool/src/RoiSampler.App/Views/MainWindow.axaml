@@ -1,0 +1,180 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RoiSampler.App.ViewModels"
+        xmlns:controls="using:RoiSampler.App.Controls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+        x:Class="RoiSampler.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="ROI 取樣工具 - RoiSampler"
+        Width="1400" Height="900">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- 工具列 -->
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+                    Orientation="Horizontal" Margin="10" Spacing="10">
+            <Button Content="載入單張影像" Command="{Binding LoadSingleImageCommand}"/>
+            <Button Content="批次載入影像" Command="{Binding LoadMultipleImagesCommand}"/>
+            <Separator/>
+            <Button Content="清除標註" Command="{Binding ClearAnnotationsCommand}"/>
+            <Button Content="清除所有樣本" Command="{Binding ClearAllSamplesCommand}"/>
+            <Separator/>
+            <Button Content="計算範本統計" Command="{Binding CalculateTemplateStatisticsCommand}" FontWeight="Bold"/>
+            <Button Content="預覽範本 JSON" Command="{Binding PreviewTemplateCommand}" 
+                    IsEnabled="{Binding CalculatedTemplate, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+            <Button Content="匯出範本 JSON" Command="{Binding ExportTemplateCommand}" FontWeight="Bold"
+                    IsEnabled="{Binding CalculatedTemplate, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+            <Separator/>
+            <Button Content="管理 Profile" Command="{Binding OpenProfileManagerCommand}"/>
+        </StackPanel>
+
+        <!-- 左側面板 -->
+        <Border Grid.Row="1" Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0" Padding="10">
+            <StackPanel Spacing="10">
+                <!-- Profile 選擇 -->
+                <TextBlock Text="欄位組 Profile" FontSize="16" FontWeight="Bold"/>
+                
+                <StackPanel Spacing="5">
+                    <TextBlock Text="選擇 Profile:"/>
+                    <ComboBox ItemsSource="{Binding AvailableProfiles}"
+                              SelectedItem="{Binding SelectedProfile}"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding ProfileName}" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Content="套用 Profile" Command="{Binding ApplyProfileCommand}" 
+                            HorizontalAlignment="Stretch"/>
+                </StackPanel>
+
+                <Separator/>
+
+                <!-- 欄位標註 -->
+                <TextBlock Text="欄位標註" FontSize="14" FontWeight="Bold"/>
+                
+                <StackPanel Spacing="5">
+                    <TextBlock Text="可用欄位:"/>
+                    <ListBox ItemsSource="{Binding CurrentFields}" Height="150">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="{Binding Label}" FontWeight="Bold" Width="120"/>
+                                    <TextBlock Text="{Binding DataType}" FontSize="10" Foreground="Blue"/>
+                                    <Button Content="標註" 
+                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartDrawingCommand}"
+                                            CommandParameter="{Binding FieldName}"
+                                            FontSize="10" Padding="5,2"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    
+                    <TextBlock Text="或手動輸入欄位名稱:"/>
+                    <TextBox x:Name="FieldNameTextBox" Watermark="例如: custom_field"/>
+                    <Button Content="開始繪製 ROI" 
+                            Command="{Binding StartDrawingCommand}"
+                            CommandParameter="{Binding #FieldNameTextBox.Text}"/>
+                </StackPanel>
+
+                <Separator/>
+
+                <TextBlock Text="已標註欄位" FontSize="14" FontWeight="Bold"/>
+                <ListBox ItemsSource="{Binding Annotations}" Height="400">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="{Binding}" VerticalAlignment="Center"/>
+                                <Button Content="刪除" 
+                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).DeleteAnnotationCommand}"
+                                        CommandParameter="{Binding}"
+                                        FontSize="10"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Separator/>
+
+                <!-- 樣本管理 -->
+                <TextBlock Text="樣本管理" FontSize="14" FontWeight="Bold"/>
+                <TextBlock Text="{Binding Samples.Count, StringFormat='共 {0} 個樣本'}" FontSize="12" Foreground="Gray"/>
+                
+                <ListBox ItemsSource="{Binding Samples}" 
+                         SelectedItem="{Binding SelectedSample}"
+                         Height="200">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="LightGray" BorderThickness="1" Padding="5" Margin="2">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                        <TextBlock Text="{Binding Id, StringFormat='#{0}'}" FontWeight="Bold" Foreground="Blue"/>
+                                        <TextBlock Text="{Binding FilePath}" 
+                                                   MaxWidth="200" TextTrimming="CharacterEllipsis"
+                                                   ToolTip.Tip="{Binding FilePath}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,3,0,0">
+                                        <TextBlock Text="{Binding Width, StringFormat='{}{0}x'}" FontSize="10"/>
+                                        <TextBlock Text="{Binding Height, StringFormat='{}{0} px'}" FontSize="10"/>
+                                        <TextBlock Text="{Binding Annotations.Count, StringFormat='  已標註: {0} 個'}" 
+                                                   FontSize="10" Foreground="Green"/>
+                                    </StackPanel>
+                                    <Button Content="移除" 
+                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).RemoveSampleCommand}"
+                                            CommandParameter="{Binding}"
+                                            FontSize="10" 
+                                            HorizontalAlignment="Right"
+                                            Margin="0,3,0,0"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </Border>
+
+        <!-- 中央圖片區域 -->
+        <ScrollViewer Grid.Row="1" Grid.Column="1" 
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+            <controls:RoiCanvas x:Name="ImageCanvas"
+                                Image="{Binding CurrentImage}"
+                                IsDrawing="{Binding IsDrawing}"
+                                StartX="{Binding StartX}"
+                                StartY="{Binding StartY}"
+                                CurrentX="{Binding CurrentX}"
+                                CurrentY="{Binding CurrentY}"
+                                Width="{Binding ImageWidth}"
+                                Height="{Binding ImageHeight}"/>
+        </ScrollViewer>
+
+        <!-- 狀態列 -->
+        <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+                Background="#F0F0F0" Padding="10,5">
+            <TextBlock Text="{Binding StatusMessage}" FontSize="12"/>
+        </Border>
+    </Grid>
+
+</Window>
+

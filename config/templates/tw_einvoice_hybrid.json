@@ -1,0 +1,127 @@
+{
+  "template_id": "tw_einvoice_hybrid",
+  "template_name": "台灣電子發票證明聯（混合策略）",
+  "version": "3.0.0",
+  "created_at": "2025-12-23",
+  "description": "採用混合提取策略：全圖 OCR + ROI 位置提示",
+  
+  "processing_strategy": "hybrid_ocr_roi",
+  
+  "sampling_metadata": {
+    "sample_count": 2,
+    "reference_size": {
+      "width": 2163,
+      "height": 1355,
+      "unit": "pixel",
+      "description": "基於 2 張樣本圖片的中位數大小"
+    },
+    "sampling_date": "2025-12-23",
+    "sampler_version": "ROI Sampler Tool v1.0"
+  },
+  
+  "regions": {
+    "invoice_number": {
+      "rect_ratio": {
+        "x": 0.046,
+        "y": 0.058,
+        "width": 0.462,
+        "height": 0.037
+      },
+      "pattern": "[A-Z]{2}-\\d{8}",
+      "extract_group": 0,
+      "expected_length": 11,
+      "required": true,
+      "position_weight": 0.3,
+      "tolerance_ratio": 0.2,
+      "data_type": "string",
+      "description": "發票號碼（例：VJ-50215372）"
+    },
+    
+    "invoice_date": {
+      "rect_ratio": {
+        "x": 0.038,
+        "y": 0.022,
+        "width": 0.481,
+        "height": 0.044
+      },
+      "pattern": "\\d{3}年\\d{1,2}-\\d{1,2}月",
+      "extract_group": 0,
+      "required": true,
+      "position_weight": 0.3,
+      "tolerance_ratio": 0.2,
+      "data_type": "date",
+      "description": "開立日期（例：114年11-12月）"
+    },
+    
+    "random_code": {
+      "rect_ratio": {
+        "x": 0.555,
+        "y": 0.702,
+        "width": 0.231,
+        "height": 0.037
+      },
+      "pattern": "隨機碼[:：]\\s*(\\d{4})",
+      "extract_group": 1,
+      "fallback_pattern": "\\d{4}",
+      "expected_length": 4,
+      "required": true,
+      "position_weight": 0.3,
+      "tolerance_ratio": 0.2,
+      "data_type": "string",
+      "description": "隨機碼（例：3472）"
+    },
+    
+    "total_amount": {
+      "rect_ratio": {
+        "x": 0.581,
+        "y": 0.639,
+        "width": 0.153,
+        "height": 0.037
+      },
+      "pattern": "總計[:：]\\s*\\$?\\s*([\\d,]+)",
+      "extract_group": 1,
+      "fallback_pattern": "\\d+",
+      "required": true,
+      "position_weight": 0.3,
+      "tolerance_ratio": 0.2,
+      "data_type": "number",
+      "description": "總計金額（例：20）"
+    },
+    
+    "seller_tax_id": {
+      "rect_ratio": {
+        "x": 0.019,
+        "y": 0.949,
+        "width": 0.256,
+        "height": 0.037
+      },
+      "pattern": "賣方[:：]?\\s*(\\d{8})",
+      "extract_group": 1,
+      "fallback_pattern": "\\d{8}",
+      "expected_length": 8,
+      "required": false,
+      "position_weight": 0.4,
+      "tolerance_ratio": 0.2,
+      "data_type": "tax_id",
+      "description": "賣方統一編號（例：42552150）"
+    },
+    
+    "buyer_tax_id": {
+      "rect_ratio": {
+        "x": 0.295,
+        "y": 0.949,
+        "width": 0.169,
+        "height": 0.037
+      },
+      "pattern": "買方[:：]?\\s*(\\d{8})",
+      "extract_group": 1,
+      "fallback_pattern": "\\d{8}",
+      "expected_length": 8,
+      "required": false,
+      "position_weight": 0.4,
+      "tolerance_ratio": 0.2,
+      "data_type": "tax_id",
+      "description": "買方統一編號"
+    }
+  }
+}

@@ -1,0 +1,303 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ocr-pipeline.example.com/schemas/template-v1.0.json",
+  "title": "OCR Template Schema",
+  "description": "OCR 作業範本定義規格 - 使用相對比例座標系統",
+  "type": "object",
+  
+  "required": [
+    "template_id",
+    "template_name",
+    "version",
+    "processing_strategy",
+    "sampling_metadata",
+    "regions"
+  ],
+  
+  "properties": {
+    "template_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "minLength": 3,
+      "maxLength": 50,
+      "description": "模板唯一識別碼（小寫英數字+底線）",
+      "examples": ["tw_einvoice_v1", "receipt_standard", "id_card_tw"]
+    },
+    
+    "template_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "模板顯示名稱（人類可讀）",
+      "examples": ["台灣電子發票證明聯", "標準收據", "台灣身分證"]
+    },
+    
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
+      "description": "模板版本號（語義化版本）",
+      "examples": ["1.0", "1.2.3", "2.0"]
+    },
+    
+    "created_at": {
+      "type": "string",
+      "format": "date",
+      "description": "模板創建日期（ISO 8601 格式）",
+      "examples": ["2025-12-23"]
+    },
+    
+    "updated_at": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "模板最後更新日期",
+      "examples": ["2025-12-23"]
+    },
+    
+    "description": {
+      "type": ["string", "null"],
+      "maxLength": 500,
+      "description": "模板詳細說明"
+    },
+    
+    "processing_strategy": {
+      "type": "string",
+      "enum": [
+        "hybrid_ocr_roi",
+        "fixed_roi",
+        "full_ocr_only",
+        "anchor_based"
+      ],
+      "description": "處理策略類型",
+      "default": "hybrid_ocr_roi"
+    },
+    
+    "sampling_metadata": {
+      "type": "object",
+      "required": ["sample_count", "reference_size"],
+      "description": "取樣統計元數據",
+      "properties": {
+        "sample_count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "參與統計的樣本圖片數量"
+        },
+        
+        "reference_size": {
+          "type": "object",
+          "required": ["width", "height", "unit"],
+          "description": "基準圖片大小（統計中位數或平均值）",
+          "properties": {
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "基準寬度"
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "基準高度"
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["pixel"],
+              "default": "pixel",
+              "description": "單位（目前僅支援 pixel）"
+            },
+            "description": {
+              "type": ["string", "null"],
+              "description": "基準大小計算方式說明"
+            }
+          }
+        },
+        
+        "size_range": {
+          "type": ["object", "null"],
+          "description": "樣本圖片大小範圍（用於評估變異性）",
+          "properties": {
+            "width": {
+              "type": "object",
+              "required": ["min", "max"],
+              "properties": {
+                "min": {"type": "integer", "minimum": 1},
+                "max": {"type": "integer", "minimum": 1}
+              }
+            },
+            "height": {
+              "type": "object",
+              "required": ["min", "max"],
+              "properties": {
+                "min": {"type": "integer", "minimum": 1},
+                "max": {"type": "integer", "minimum": 1}
+              }
+            }
+          }
+        },
+        
+        "sampling_date": {
+          "type": "string",
+          "format": "date",
+          "description": "取樣日期"
+        },
+        
+        "sampler_version": {
+          "type": "string",
+          "description": "取樣工具版本"
+        },
+        
+        "notes": {
+          "type": ["string", "null"],
+          "description": "取樣備註"
+        }
+      }
+    },
+    
+    "regions": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "欄位區域定義集合",
+      "patternProperties": {
+        "^[a-z_][a-z0-9_]*$": {
+          "$ref": "#/definitions/region"
+        }
+      }
+    }
+  },
+  
+  "definitions": {
+    "region": {
+      "type": "object",
+      "required": ["rect_ratio"],
+      "description": "單一欄位區域定義",
+      "properties": {
+        "rect_ratio": {
+          "type": "object",
+          "required": ["x", "y", "width", "height"],
+          "description": "ROI 相對比例座標（0-1 之間）",
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "左上角 X 座標比例 (x / image_width)"
+            },
+            "y": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "左上角 Y 座標比例 (y / image_height)"
+            },
+            "width": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "寬度比例 (width / image_width)"
+            },
+            "height": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "高度比例 (height / image_height)"
+            }
+          }
+        },
+        
+        "rect_std_dev": {
+          "type": ["object", "null"],
+          "description": "ROI 位置標準差（評估穩定性，可選）",
+          "properties": {
+            "x": {"type": "number", "minimum": 0},
+            "y": {"type": "number", "minimum": 0},
+            "width": {"type": "number", "minimum": 0},
+            "height": {"type": "number", "minimum": 0}
+          }
+        },
+        
+        "pattern": {
+          "type": ["string", "null"],
+          "description": "正則表達式匹配模式（可選）",
+          "examples": [
+            "[A-Z]{2}-\\d{8}",
+            "\\d{3}年\\d{1,2}-\\d{1,2}月",
+            "隨機碼[:：]\\s*(\\d{4})"
+          ]
+        },
+        
+        "extract_group": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "description": "正則捕獲組索引（0=完整匹配，1+=捕獲組）"
+        },
+        
+        "expected_length": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "預期文字長度（用於評分）"
+        },
+        
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "是否為必填欄位"
+        },
+        
+        "position_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.3,
+          "description": "位置權重（評分時位置接近度的權重）"
+        },
+        
+        "tolerance_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.2,
+          "description": "容錯範圍比例（ROI 擴展比例）"
+        },
+        
+        "fallback_pattern": {
+          "type": ["string", "null"],
+          "description": "降級策略的備用正則表達式"
+        },
+        
+        "data_type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "number",
+            "date",
+            "datetime",
+            "phone",
+            "email",
+            "tax_id",
+            "custom"
+          ],
+          "default": "string",
+          "description": "數據類型提示（用於後續驗證）"
+        },
+        
+        "validation": {
+          "type": "object",
+          "description": "額外驗證規則",
+          "properties": {
+            "min_length": {"type": "integer", "minimum": 0},
+            "max_length": {"type": "integer", "minimum": 0},
+            "min_value": {"type": "number"},
+            "max_value": {"type": "number"},
+            "allowed_values": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        
+        "description": {
+          "type": ["string", "null"],
+          "description": "欄位說明"
+        }
+      }
+    }
+  }
+}
