@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 
 namespace RoiSampler.Core.Models;
@@ -6,64 +7,82 @@ namespace RoiSampler.Core.Models;
 /// <summary>
 /// 欄位組 Profile - 預設的欄位配置模板
 /// </summary>
-public class FieldSetProfile
+public partial class FieldSetProfile : ObservableObject
 {
+    [ObservableProperty]
     [JsonPropertyName("profile_id")]
-    public string ProfileId { get; set; } = string.Empty;
+    private string _profileId = string.Empty;
 
+    [ObservableProperty]
     [JsonPropertyName("profile_name")]
-    public string ProfileName { get; set; } = string.Empty;
+    private string _profileName = string.Empty;
 
+    [ObservableProperty]
     [JsonPropertyName("description")]
-    public string? Description { get; set; }
+    private string? _description;
 
+    [ObservableProperty]
     [JsonPropertyName("document_type")]
-    public string DocumentType { get; set; } = "general";
+    private string _documentType = "general";
 
+    // 🔧 改用 ObservableCollection（MVVM 推薦）
+    [ObservableProperty]
     [JsonPropertyName("fields")]
-    public List<FieldDefinition> Fields { get; set; } = new();
+    private ObservableCollection<FieldDefinition> _fields = new();
 
+    [ObservableProperty]
     [JsonPropertyName("created_at")]
-    public string CreatedAt { get; set; } = DateTime.Now.ToString("yyyy-MM-dd");
+    private string _createdAt = DateTime.Now.ToString("yyyy-MM-dd");
 
+    [ObservableProperty]
     [JsonPropertyName("updated_at")]
-    public string? UpdatedAt { get; set; }
+    private string? _updatedAt;
 
+    [ObservableProperty]
     [JsonPropertyName("author")]
-    public string? Author { get; set; }
+    private string? _author;
 
+    [ObservableProperty]
     [JsonPropertyName("tags")]
-    public List<string>? Tags { get; set; }
+    private List<string>? _tags;
 }
 
 /// <summary>
 /// 欄位定義 - Profile 中的單一欄位
 /// </summary>
-public class FieldDefinition
+public partial class FieldDefinition : ObservableObject
 {
+    [ObservableProperty]
     [JsonPropertyName("field_name")]
-    public string FieldName { get; set; } = string.Empty;
+    private string _fieldName = string.Empty;
 
+    [ObservableProperty]
     [JsonPropertyName("display_name")]
-    public string? DisplayName { get; set; }
+    private string? _displayName;
 
+    [ObservableProperty]
     [JsonPropertyName("data_type")]
-    public string DataType { get; set; } = "string";
+    private string _dataType = "string";
 
+    [ObservableProperty]
     [JsonPropertyName("required")]
-    public bool Required { get; set; } = false;
+    private bool _required = false;
 
+    [ObservableProperty]
     [JsonPropertyName("pattern")]
-    public string? Pattern { get; set; }
+    private string? _pattern;
 
+    [ObservableProperty]
     [JsonPropertyName("expected_length")]
-    public int? ExpectedLength { get; set; }
+    private int? _expectedLength;
 
+    [ObservableProperty]
     [JsonPropertyName("description")]
-    public string? Description { get; set; }
+    private string? _description;
 
+    [ObservableProperty]
     [JsonPropertyName("example_values")]
-    public List<string>? ExampleValues { get; set; }
+    private List<string>? _exampleValues;
 
     /// <summary>
     /// 顯示名稱（用於 UI）

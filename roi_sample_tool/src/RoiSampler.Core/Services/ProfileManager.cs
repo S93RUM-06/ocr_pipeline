@@ -1,10 +1,5 @@
 using RoiSampler.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace RoiSampler.Core.Services;
 
@@ -18,8 +13,8 @@ public class ProfileManager
 
     public ProfileManager(string? profilesDirectory = null)
     {
-        // 預設存儲位置：roi_sample_tool/profiles/
-        _profilesDirectory = profilesDirectory ?? 
+        // 預設儲存位置：roi_sample_tool/profiles/
+        _profilesDirectory = profilesDirectory ??
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "profiles");
 
         _jsonOptions = new JsonSerializerOptions
@@ -52,45 +47,146 @@ public class ProfileManager
         var profiles = ListProfiles();
         if (profiles.Count == 0)
         {
-            // 建立預設 Profile：台灣電子發票證明聯
+            // 🔧 建立預設 Profile：台灣電子發票證明聯
             var taiwanEInvoice = new FieldSetProfile
             {
                 ProfileId = "tw_einvoice_v1",
                 ProfileName = "台灣電子發票證明聯",
                 Description = "統一發票證明聯（電子發票）常見欄位",
                 DocumentType = "invoice",
-                Tags = new List<string> { "台灣", "發票", "電子發票" },
-                Fields = new List<FieldDefinition>
-                {
-                    new() { FieldName = "invoice_number", DisplayName = "發票號碼", DataType = "string", Required = true, Pattern = "[A-Z]{2}-\\d{8}", ExpectedLength = 10, Description = "格式: AB-12345678" },
-                    new() { FieldName = "invoice_date", DisplayName = "發票日期", DataType = "date", Required = true, Description = "開立日期" },
-                    new() { FieldName = "seller_name", DisplayName = "賣方名稱", DataType = "string", Description = "銷售方統一編號/名稱" },
-                    new() { FieldName = "buyer_tax_id", DisplayName = "買方統編", DataType = "string", Pattern = "\\d{8}", ExpectedLength = 8, Description = "買受人統一編號（8碼）" },
-                    new() { FieldName = "total_amount", DisplayName = "總金額", DataType = "number", Required = true, Description = "含稅總額" },
-                    new() { FieldName = "random_code", DisplayName = "隨機碼", DataType = "string", Pattern = "\\d{4}", ExpectedLength = 4, Description = "4位隨機碼" },
-                    new() { FieldName = "qrcode_left", DisplayName = "QR Code (左)", DataType = "string", Description = "左側 QR Code" },
-                    new() { FieldName = "qrcode_right", DisplayName = "QR Code (右)", DataType = "string", Description = "右側 QR Code" }
-                }
+                Tags = new List<string> { "台灣", "發票", "電子發票" }
             };
 
-            // 建立預設 Profile：一般收據
+            // 🔧 使用屬性賦值而非集合初始化器
+            taiwanEInvoice.Fields.Add(new FieldDefinition
+            {
+                FieldName = "invoice_number",
+                DisplayName = "發票號碼",
+                DataType = "string",
+                Required = true,
+                Pattern = "[A-Z]{2}-\\d{8}",
+                ExpectedLength = 10,
+                Description = "格式: AB-12345678"
+            });
+
+            taiwanEInvoice.Fields.Add(new FieldDefinition
+            {
+                FieldName = "invoice_date",
+                DisplayName = "發票日期",
+                DataType = "date",
+                Required = true,
+                Description = "開立日期"
+            });
+
+            taiwanEInvoice.Fields.Add(new FieldDefinition
+            {
+                FieldName = "seller_tax_id",
+                DisplayName = "賣方統編",
+                DataType = "string",
+                Pattern = "\\d{8}",
+                ExpectedLength = 8,
+                Description = "銷售方統一編號（8碼）"
+            });
+
+            taiwanEInvoice.Fields.Add(new FieldDefinition
+            {
+                FieldName = "buyer_tax_id",
+                DisplayName = "買方統編",
+                DataType = "string",
+                Pattern = "\\d{8}",
+                ExpectedLength = 8,
+                Description = "買受人統一編號（8碼）"
+            });
+
+            taiwanEInvoice.Fields.Add(new FieldDefinition
+            {
+                FieldName = "total_amount",
+                DisplayName = "總金額",
+                DataType = "number",
+                Required = true,
+                Description = "含稅總額"
+            });
+
+            taiwanEInvoice.Fields.Add(new FieldDefinition
+            {
+                FieldName = "random_code",
+                DisplayName = "隨機碼",
+                DataType = "string",
+                Pattern = "\\d{4}",
+                ExpectedLength = 4,
+                Description = "4位隨機碼"
+            });
+
+            taiwanEInvoice.Fields.Add(new FieldDefinition
+            {
+                FieldName = "qrcode_left",
+                DisplayName = "QR Code (左)",
+                DataType = "string",
+                Description = "左側 QR Code"
+            });
+
+            taiwanEInvoice.Fields.Add(new FieldDefinition
+            {
+                FieldName = "qrcode_right",
+                DisplayName = "QR Code (右)",
+                DataType = "string",
+                Description = "右側 QR Code"
+            });
+
+            // 🔧 建立預設 Profile：一般收據
             var generalReceipt = new FieldSetProfile
             {
                 ProfileId = "general_receipt_v1",
                 ProfileName = "一般收據",
                 Description = "一般商業收據常見欄位",
                 DocumentType = "receipt",
-                Tags = new List<string> { "收據", "通用" },
-                Fields = new List<FieldDefinition>
-                {
-                    new() { FieldName = "receipt_number", DisplayName = "收據編號", DataType = "string", Required = true },
-                    new() { FieldName = "receipt_date", DisplayName = "收據日期", DataType = "date", Required = true },
-                    new() { FieldName = "payer_name", DisplayName = "付款人", DataType = "string" },
-                    new() { FieldName = "total_amount", DisplayName = "總金額", DataType = "number", Required = true },
-                    new() { FieldName = "payment_method", DisplayName = "付款方式", DataType = "string" },
-                    new() { FieldName = "description", DisplayName = "項目說明", DataType = "string" }
-                }
+                Tags = new List<string> { "收據", "通用" }
             };
+
+            generalReceipt.Fields.Add(new FieldDefinition
+            {
+                FieldName = "receipt_number",
+                DisplayName = "收據編號",
+                DataType = "string",
+                Required = true
+            });
+
+            generalReceipt.Fields.Add(new FieldDefinition
+            {
+                FieldName = "receipt_date",
+                DisplayName = "收據日期",
+                DataType = "date",
+                Required = true
+            });
+
+            generalReceipt.Fields.Add(new FieldDefinition
+            {
+                FieldName = "payer_name",
+                DisplayName = "付款人",
+                DataType = "string"
+            });
+
+            generalReceipt.Fields.Add(new FieldDefinition
+            {
+                FieldName = "total_amount",
+                DisplayName = "總金額",
+                DataType = "number",
+                Required = true
+            });
+
+            generalReceipt.Fields.Add(new FieldDefinition
+            {
+                FieldName = "payment_method",
+                DisplayName = "付款方式",
+                DataType = "string"
+            });
+
+            generalReceipt.Fields.Add(new FieldDefinition
+            {
+                FieldName = "description",
+                DisplayName = "項目說明",
+                DataType = "string"
+            });
 
             SaveProfile(taiwanEInvoice);
             SaveProfile(generalReceipt);
@@ -132,7 +228,7 @@ public class ProfileManager
     public FieldSetProfile? LoadProfile(string profileId)
     {
         var filePath = Path.Combine(_profilesDirectory, $"{profileId}.json");
-        
+
         if (!File.Exists(filePath))
             return null;
 
@@ -174,7 +270,7 @@ public class ProfileManager
     public void DeleteProfile(string profileId)
     {
         var filePath = Path.Combine(_profilesDirectory, $"{profileId}.json");
-        
+
         if (File.Exists(filePath))
         {
             File.Delete(filePath);
@@ -206,10 +302,25 @@ public class ProfileManager
             ProfileName = newName,
             Description = source.Description,
             DocumentType = source.DocumentType,
-            Fields = new List<FieldDefinition>(source.Fields),
             CreatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             Tags = source.Tags != null ? new List<string>(source.Tags) : null
         };
+
+        // 🔧 複製欄位
+        foreach (var field in source.Fields)
+        {
+            clone.Fields.Add(new FieldDefinition
+            {
+                FieldName = field.FieldName,
+                DisplayName = field.DisplayName,
+                DataType = field.DataType,
+                Required = field.Required,
+                Pattern = field.Pattern,
+                ExpectedLength = field.ExpectedLength,
+                Description = field.Description,
+                ExampleValues = field.ExampleValues != null ? new List<string>(field.ExampleValues) : null
+            });
+        }
 
         return clone;
     }
@@ -244,7 +355,10 @@ public class ProfileManager
             errors.Add("ProfileName 不可為空");
 
         if (profile.Fields == null || profile.Fields.Count == 0)
+        {
             errors.Add("至少需要一個欄位");
+            return errors;
+        }
 
         // 檢查欄位名稱唯一性
         var duplicateFields = profile.Fields

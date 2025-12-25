@@ -38,8 +38,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private ImageSample? _selectedSample;
 
+    // 🔧 改用核心模型類別
     [ObservableProperty]
-    private ObservableCollection<RoiAnnotation> _annotations = new();
+    private ObservableCollection<AnnotationDisplayItem> _annotations = new();
 
     [ObservableProperty]
     private string? _currentFieldName;
@@ -91,7 +92,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         AvailableProfiles.Clear();
         var profiles = _profileManager.ListProfiles();
-        
+
         foreach (var profile in profiles)
         {
             AvailableProfiles.Add(profile);
@@ -106,7 +107,7 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnSelectedProfileChanged(FieldSetProfile? value)
     {
         CurrentFields.Clear();
-        
+
         if (value != null)
         {
             foreach (var field in value.Fields)
@@ -145,10 +146,10 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task OpenProfileManager()
     {
         var window = new Views.ProfileManagerWindow();
-        await window.ShowDialog(App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop 
-            ? desktop.MainWindow 
+        await window.ShowDialog(App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+            ? desktop.MainWindow
             : null);
-        
+
         // 對話框關閉後重新載入 Profiles
         LoadProfiles();
     }
@@ -168,7 +169,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
             using var stream = File.OpenRead(filePath);
             CurrentImage = await Task.Run(() => Bitmap.DecodeToWidth(stream, 1200));
-            
+
             ImageWidth = CurrentImage.Size.Width;
             ImageHeight = CurrentImage.Size.Height;
 
@@ -265,7 +266,7 @@ public partial class MainWindowViewModel : ViewModelBase
             foreach (var file in files)
             {
                 var filePath = file.Path.LocalPath;
-                
+
                 try
                 {
                     // 讀取影像尺寸（不顯示）
@@ -375,31 +376,31 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        // 建立標註
-        var annotation = new RoiAnnotation
+        // 🔧 使用 PixelRect 替代 RoiAnnotation
+        var pixelRect = new PixelRect
         {
-            FieldName = CurrentFieldName!,
             X = (int)rectX,
             Y = (int)rectY,
             Width = (int)rectWidth,
             Height = (int)rectHeight
         };
 
-        Annotations.Add(annotation);
+        // 建立顯示項目
+        var displayItem = new AnnotationDisplayItem
+        {
+            FieldName = CurrentFieldName!,
+            Rect = pixelRect
+        };
+
+        Annotations.Add(displayItem);
 
         if (SelectedSample != null)
         {
-            SelectedSample.Annotations[CurrentFieldName!] = new PixelRect
-            {
-                X = (int)rectX,
-                Y = (int)rectY,
-                Width = (int)rectWidth,
-                Height = (int)rectHeight
-            };
+            SelectedSample.Annotations[CurrentFieldName!] = pixelRect;
         }
 
-        StatusMessage = $"已新增 ROI: {CurrentFieldName} ({rectX:F0}, {rectY:F0}, {rectWidth:F0}x{rectHeight:F0})";
-        
+        StatusMessage = $"已新增 ROI: {CurrentFieldName} {pixelRect}";
+
         // 清空欄位名稱以便繪製下一個
         CurrentFieldName = null;
     }
@@ -422,7 +423,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// 刪除選定的標註
     /// </summary>
     [RelayCommand]
-    private void DeleteAnnotation(RoiAnnotation annotation)
+    private void DeleteAnnotation(AnnotationDisplayItem annotation)
     {
         Annotations.Remove(annotation);
         if (SelectedSample != null)
@@ -430,6 +431,25 @@ public partial class MainWindowViewModel : ViewModelBase
             SelectedSample.Annotations.Remove(annotation.FieldName);
         }
         StatusMessage = $"已刪除標註: {annotation.FieldName}";
+    }
+
+    /// <summary>
+    /// 從當前樣本更新標註列表
+    /// </summary>
+    private void UpdateAnnotationsFromSample()
+    {
+        Annotations.Clear();
+
+        if (SelectedSample == null) return;
+
+        foreach (var kvp in SelectedSample.Annotations)
+        {
+            Annotations.Add(new AnnotationDisplayItem
+            {
+                FieldName = kvp.Key,
+                Rect = kvp.Value
+            });
+        }
     }
 
     /// <summary>
@@ -447,35 +467,13 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// 從當前樣本更新標註列表
-    /// </summary>
-    private void UpdateAnnotationsFromSample()
-    {
-        Annotations.Clear();
-
-        if (SelectedSample == null) return;
-
-        foreach (var kvp in SelectedSample.Annotations)
-        {
-            Annotations.Add(new RoiAnnotation
-            {
-                FieldName = kvp.Key,
-                X = kvp.Value.X,
-                Y = kvp.Value.Y,
-                Width = kvp.Value.Width,
-                Height = kvp.Value.Height
-            });
-        }
-    }
-
-    /// <summary>
     /// 移除樣本
     /// </summary>
     [RelayCommand]
     private void RemoveSample(ImageSample sample)
     {
         Samples.Remove(sample);
-        
+
         if (SelectedSample == sample)
         {
             SelectedSample = Samples.FirstOrDefault();
@@ -504,10 +502,10 @@ public partial class MainWindowViewModel : ViewModelBase
     public string GetSampleProgress(ImageSample sample)
     {
         if (SelectedProfile == null) return $"{sample.Annotations.Count} 個欄位";
-        
+
         int totalFields = SelectedProfile.Fields.Count;
         int annotatedFields = sample.Annotations.Count;
-        
+
         return $"{annotatedFields}/{totalFields}";
     }
 
@@ -517,10 +515,10 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsSampleComplete(ImageSample sample)
     {
         if (SelectedProfile == null) return false;
-        
+
         var requiredFields = SelectedProfile.Fields.Select(f => f.FieldName).ToHashSet();
         var annotatedFields = sample.Annotations.Keys.ToHashSet();
-        
+
         return requiredFields.IsSubsetOf(annotatedFields);
     }
 
@@ -564,7 +562,7 @@ public partial class MainWindowViewModel : ViewModelBase
             summary += $"  樣本數: {template.SamplingMetadata.SampleCount}\n";
             summary += $"  參考尺寸: {template.SamplingMetadata.ReferenceSize.Width}x{template.SamplingMetadata.ReferenceSize.Height}\n";
             summary += $"  欄位數: {template.Regions.Count}\n";
-            
+
             foreach (var (fieldName, region) in template.Regions)
             {
                 var stdDevInfo = region.RectStdDev != null
@@ -709,16 +707,13 @@ public partial class MainWindowViewModel : ViewModelBase
 }
 
 /// <summary>
-/// ROI 標註 (UI 用)
+/// 標註顯示項目（用於 UI 綁定）
 /// </summary>
-public class RoiAnnotation
+public class AnnotationDisplayItem
 {
     public string FieldName { get; set; } = string.Empty;
-    public int X { get; set; }
-    public int Y { get; set; }
-    public int Width { get; set; }
-    public int Height { get; set; }
+    public PixelRect Rect { get; set; } = new();
 
-    public override string ToString() => $"{FieldName}: ({X}, {Y}, {Width}x{Height})";
+    public override string ToString() => $"{FieldName}: {Rect}";
 }
 

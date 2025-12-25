@@ -1,9 +1,5 @@
 using RoiSampler.Core.Models;
 using RoiSampler.Core.Validation;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace RoiSampler.Tests.Validation
 {

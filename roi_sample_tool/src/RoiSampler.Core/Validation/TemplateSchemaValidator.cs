@@ -1,11 +1,6 @@
 using NJsonSchema;
 using RoiSampler.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace RoiSampler.Core.Validation
 {
@@ -71,7 +66,7 @@ namespace RoiSampler.Core.Validation
                 errors.AddRange(schemaErrors.Select(e => new ValidationError
                 {
                     ErrorType = ValidationErrorType.SchemaViolation,
-                    Path = e.Path,
+                    Path = e.Path ?? string.Empty,
                     Message = e.ToString()
                 }));
             }

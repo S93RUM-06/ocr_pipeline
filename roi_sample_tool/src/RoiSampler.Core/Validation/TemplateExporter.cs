@@ -1,6 +1,6 @@
+using RoiSampler.Core.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using RoiSampler.Core.Models;
 
 namespace RoiSampler.Core.Validation;
 

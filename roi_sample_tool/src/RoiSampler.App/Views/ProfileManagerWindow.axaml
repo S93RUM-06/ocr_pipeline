@@ -96,29 +96,46 @@
                         </StackPanel>
                     </Grid>
 
-                    <DataGrid ItemsSource="{Binding SelectedFields}" 
-                              Height="300" 
-                              IsReadOnly="{Binding !IsEditing}"
-                              CanUserReorderColumns="True"
-                              CanUserResizeColumns="True">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="欄位名稱" Binding="{Binding FieldName}" Width="150"/>
-                            <DataGridTextColumn Header="顯示名稱" Binding="{Binding DisplayName}" Width="120"/>
-                            <DataGridTextColumn Header="資料類型" Binding="{Binding DataType}" Width="100"/>
-                            <DataGridCheckBoxColumn Header="必填" Binding="{Binding Required}" Width="60"/>
-                            <DataGridTextColumn Header="正則表達式" Binding="{Binding Pattern}" Width="150"/>
-                            <DataGridTemplateColumn Header="操作" Width="80">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button Content="刪除" 
-                                                Command="{Binding $parent[Window].((vm:ProfileManagerViewModel)DataContext).DeleteFieldCommand}"
-                                                CommandParameter="{Binding}"
-                                                IsEnabled="{Binding $parent[Window].((vm:ProfileManagerViewModel)DataContext).IsEditing}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <!-- 將 DataGrid 的綁定改為直接綁定到 SelectedProfile.Fields -->
+                    <DataGrid ItemsSource="{Binding SelectedProfile.Fields}" 
+                        Height="300" 
+                        IsReadOnly="{Binding !IsEditing}"
+                        AutoGenerateColumns="False"
+                        CanUserReorderColumns="True"
+                        CanUserResizeColumns="True"
+                        GridLinesVisibility="All"
+                        BorderThickness="1"
+                        BorderBrush="Gray">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="欄位名稱" 
+                                            Binding="{Binding FieldName}" 
+                                            Width="150"/>
+                        <DataGridTextColumn Header="顯示名稱" 
+                                            Binding="{Binding DisplayName}" 
+                                            Width="120"/>
+                        <DataGridTextColumn Header="資料類型" 
+                                            Binding="{Binding DataType}" 
+                                            Width="100"/>
+                        <DataGridCheckBoxColumn Header="必填" 
+                                                Binding="{Binding Required}" 
+                                                Width="60"/>
+                        <DataGridTextColumn Header="正則表達式" 
+                                            Binding="{Binding Pattern}" 
+                                            Width="150"/>
+                        <DataGridTemplateColumn Header="操作" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="刪除" 
+                                            Command="{Binding $parent[Window].((vm:ProfileManagerViewModel)DataContext).DeleteFieldCommand}"
+                                            CommandParameter="{Binding}"
+                                            IsEnabled="{Binding $parent[Window].((vm:ProfileManagerViewModel)DataContext).IsEditing}"
+                                            FontSize="10"
+                                            Padding="5,2"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

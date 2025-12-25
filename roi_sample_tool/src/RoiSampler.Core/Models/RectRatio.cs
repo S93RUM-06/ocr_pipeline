@@ -2,6 +2,7 @@ namespace RoiSampler.Core.Models;
 
 /// <summary>
 /// ROI 相對比例座標 (0-1 之間)
+/// 用於範本 JSON 儲存，與圖片尺寸無關
 /// </summary>
 public class RectRatio
 {
@@ -26,10 +27,14 @@ public class RectRatio
     public double Height { get; set; }
 
     /// <summary>
-    /// 從像素座標轉換為比例座標
+    /// 從像素座標建立比例座標
     /// </summary>
-    public static RectRatio FromPixels(int x, int y, int width, int height, int imageWidth, int imageHeight)
+    public static RectRatio FromPixels(int x, int y, int width, int height,
+                                       int imageWidth, int imageHeight)
     {
+        if (imageWidth <= 0 || imageHeight <= 0)
+            throw new ArgumentException("Image dimensions must be positive");
+
         return new RectRatio
         {
             X = Math.Round((double)x / imageWidth, 4),
@@ -41,14 +46,37 @@ public class RectRatio
 
     /// <summary>
     /// 轉換為像素座標
+    /// 注意：這個方法保留是為了向後相容，建議使用 PixelRect.FromRatio()
     /// </summary>
     public (int x, int y, int width, int height) ToPixels(int imageWidth, int imageHeight)
     {
+        if (imageWidth <= 0 || imageHeight <= 0)
+            throw new ArgumentException("Image dimensions must be positive");
+
         return (
-            (int)(X * imageWidth),
-            (int)(Y * imageHeight),
-            (int)(Width * imageWidth),
-            (int)(Height * imageHeight)
+            (int)Math.Round(X * imageWidth),
+            (int)Math.Round(Y * imageHeight),
+            (int)Math.Round(Width * imageWidth),
+            (int)Math.Round(Height * imageHeight)
         );
     }
+
+    /// <summary>
+    /// 驗證比例是否在有效範圍內
+    /// </summary>
+    public bool IsValid()
+    {
+        return X >= 0 && X <= 1 &&
+               Y >= 0 && Y <= 1 &&
+               Width >= 0 && Width <= 1 &&
+               Height >= 0 && Height <= 1 &&
+               X + Width <= 1 &&
+               Y + Height <= 1;
+    }
+
+    /// <summary>
+    /// 顯示用字串
+    /// </summary>
+    public override string ToString() =>
+        $"({X:F4}, {Y:F4}, {Width:F4}x{Height:F4})";
 }

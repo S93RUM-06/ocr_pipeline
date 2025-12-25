@@ -120,7 +120,7 @@ public class RoiCanvas : Control
             var rect = new Rect(x, y, width, height);
             var pen = new Pen(Brushes.Red, 2);
             var fillBrush = new SolidColorBrush(Colors.Red, 0.2);
-            
+
             context.DrawRectangle(fillBrush, pen, rect);
         }
     }

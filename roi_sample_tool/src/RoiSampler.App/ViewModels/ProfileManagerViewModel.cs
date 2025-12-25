@@ -4,7 +4,6 @@ using RoiSampler.Core.Models;
 using RoiSampler.Core.Services;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace RoiSampler.App.ViewModels;
 
@@ -17,9 +16,6 @@ public partial class ProfileManagerViewModel : ObservableObject
 
     [ObservableProperty]
     private FieldSetProfile? _selectedProfile;
-
-    [ObservableProperty]
-    private ObservableCollection<FieldDefinition> _selectedFields = new();
 
     [ObservableProperty]
     private string _statusMessage = string.Empty;
@@ -41,51 +37,58 @@ public partial class ProfileManagerViewModel : ObservableObject
     {
         Profiles.Clear();
         var profiles = _profileManager.ListProfiles();
-        
+
         foreach (var profile in profiles)
         {
             Profiles.Add(profile);
         }
 
         StatusMessage = $"已載入 {Profiles.Count} 個 Profile";
+
+        // 如果有 Profile，自動選擇第一個
+        if (Profiles.Count > 0 && SelectedProfile == null)
+        {
+            SelectedProfile = Profiles[0];
+        }
     }
 
     /// <summary>
-    /// Profile 選擇變更
+    /// Profile 選擇變更 - 觸發 UI 更新
     /// </summary>
     partial void OnSelectedProfileChanged(FieldSetProfile? value)
     {
-        SelectedFields.Clear();
-        
+        // 觸發屬性變更通知，讓 DataGrid 知道要重新綁定
+        OnPropertyChanged(nameof(SelectedProfile));
+
         if (value != null)
         {
-            foreach (var field in value.Fields)
-            {
-                SelectedFields.Add(field);
-            }
             StatusMessage = $"已選擇: {value.ProfileName} ({value.Fields.Count} 個欄位)";
         }
+        else
+        {
+            StatusMessage = "未選擇 Profile";
+        }
+
+        // 確保不在編輯模式
+        IsEditing = false;
     }
 
     /// <summary>
     /// 建立新 Profile
     /// </summary>
     [RelayCommand]
-    private void CreateNewProfile(string? profileName = null)
+    private void CreateNewProfile()
     {
-        if (string.IsNullOrWhiteSpace(profileName))
-        {
-            profileName = "新 Profile";
-        }
-
+        var profileName = $"新 Profile {Profiles.Count + 1}";
         var newProfile = _profileManager.CreateNewProfile(profileName);
-        
+
         // 加入預設欄位
         newProfile.Fields.Add(new FieldDefinition
         {
             FieldName = "field_1",
             DisplayName = "欄位 1",
-            DataType = "string"
+            DataType = "string",
+            Required = false
         });
 
         Profiles.Add(newProfile);
@@ -109,9 +112,10 @@ public partial class ProfileManagerViewModel : ObservableObject
 
         var newName = $"{SelectedProfile.ProfileName} (副本)";
         var cloned = _profileManager.CloneProfile(SelectedProfile, newName);
-        
+
         Profiles.Add(cloned);
         SelectedProfile = cloned;
+        IsEditing = true;
 
         StatusMessage = $"已複製 Profile: {newName}";
     }
@@ -139,11 +143,11 @@ public partial class ProfileManagerViewModel : ObservableObject
         {
             _profileManager.SaveProfile(SelectedProfile);
             IsEditing = false;
-            StatusMessage = $"已儲存: {SelectedProfile.ProfileName}";
+            StatusMessage = $"✅ 已儲存: {SelectedProfile.ProfileName}";
         }
         catch (System.Exception ex)
         {
-            StatusMessage = $"儲存失敗: {ex.Message}";
+            StatusMessage = $"❌ 儲存失敗: {ex.Message}";
         }
     }
 
@@ -160,10 +164,16 @@ public partial class ProfileManagerViewModel : ObservableObject
         }
 
         var profileName = SelectedProfile.ProfileName;
-        _profileManager.DeleteProfile(SelectedProfile.ProfileId);
-        
-        Profiles.Remove(SelectedProfile);
+        var profileToDelete = SelectedProfile;
+
+        // 先取消選擇
         SelectedProfile = null;
+
+        // 從列表中移除
+        Profiles.Remove(profileToDelete);
+
+        // 刪除檔案
+        _profileManager.DeleteProfile(profileToDelete.ProfileId);
 
         StatusMessage = $"已刪除: {profileName}";
     }
@@ -172,7 +182,7 @@ public partial class ProfileManagerViewModel : ObservableObject
     /// 新增欄位
     /// </summary>
     [RelayCommand]
-    private void AddField(string? fieldName = null)
+    private void AddField()
     {
         if (SelectedProfile == null)
         {
@@ -180,19 +190,19 @@ public partial class ProfileManagerViewModel : ObservableObject
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(fieldName))
-        {
-            fieldName = $"field_{SelectedProfile.Fields.Count + 1}";
-        }
-
+        var fieldName = $"field_{SelectedProfile.Fields.Count + 1}";
         var newField = new FieldDefinition
         {
             FieldName = fieldName,
-            DataType = "string"
+            DisplayName = $"欄位 {SelectedProfile.Fields.Count + 1}",
+            DataType = "string",
+            Required = false
         };
 
         SelectedProfile.Fields.Add(newField);
-        SelectedFields.Add(newField);
+
+        // 強制觸發 UI 更新
+        OnPropertyChanged(nameof(SelectedProfile));
 
         StatusMessage = $"已新增欄位: {fieldName}";
     }
@@ -203,10 +213,12 @@ public partial class ProfileManagerViewModel : ObservableObject
     [RelayCommand]
     private void DeleteField(FieldDefinition field)
     {
-        if (SelectedProfile == null) return;
+        if (SelectedProfile == null || field == null) return;
 
         SelectedProfile.Fields.Remove(field);
-        SelectedFields.Remove(field);
+
+        // 強制觸發 UI 更新
+        OnPropertyChanged(nameof(SelectedProfile));
 
         StatusMessage = $"已刪除欄位: {field.FieldName}";
     }
@@ -234,7 +246,17 @@ public partial class ProfileManagerViewModel : ObservableObject
     private void CancelEdit()
     {
         IsEditing = false;
-        LoadProfiles(); // 重新載入以還原變更
+
+        // 重新載入以還原變更
+        var currentProfileId = SelectedProfile?.ProfileId;
+        LoadProfiles();
+
+        // 恢復選擇
+        if (currentProfileId != null)
+        {
+            SelectedProfile = Profiles.FirstOrDefault(p => p.ProfileId == currentProfileId);
+        }
+
         StatusMessage = "已取消編輯";
     }
 }

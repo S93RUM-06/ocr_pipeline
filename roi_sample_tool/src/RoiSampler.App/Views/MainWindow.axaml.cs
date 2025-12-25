@@ -9,7 +9,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        
+
         // 連接 Canvas 事件到 ViewModel
         ImageCanvas.PointerPressed += OnCanvasPointerPressed;
         ImageCanvas.PointerMoved += OnCanvasPointerMoved;
