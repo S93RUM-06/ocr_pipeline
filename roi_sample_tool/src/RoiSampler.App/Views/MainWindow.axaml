@@ -82,7 +82,7 @@
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                     <TextBlock Text="{Binding Label}" FontWeight="Bold" Width="120"/>
                                     <TextBlock Text="{Binding DataType}" FontSize="10" Foreground="Blue"/>
-                                    <Button Content="標註" 
+                                        <Button Content="標註" 
                                             Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartDrawingCommand}"
                                             CommandParameter="{Binding FieldName}"
                                             FontSize="10" Padding="5,2"/>
@@ -172,7 +172,7 @@
         <!-- 狀態列 -->
         <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
                 Background="#F0F0F0" Padding="10,5">
-            <TextBlock Text="{Binding StatusMessage}" FontSize="12"/>
+            <TextBlock Text="{Binding StatusMessage}" FontSize="12" Foreground="Black"/>
         </Border>
     </Grid>
 

@@ -120,7 +120,7 @@ public partial class ProfileManagerViewModel : ObservableObject
     /// 儲存 Profile
     /// </summary>
     [RelayCommand]
-    private async Task SaveProfileAsync()
+    private void SaveProfile()
     {
         if (SelectedProfile == null)
         {
@@ -137,7 +137,7 @@ public partial class ProfileManagerViewModel : ObservableObject
 
         try
         {
-            await _profileManager.SaveProfile(SelectedProfile);
+            _profileManager.SaveProfile(SelectedProfile);
             IsEditing = false;
             StatusMessage = $"已儲存: {SelectedProfile.ProfileName}";
         }

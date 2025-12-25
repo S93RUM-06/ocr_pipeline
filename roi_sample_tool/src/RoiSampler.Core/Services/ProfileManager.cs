@@ -92,8 +92,8 @@ public class ProfileManager
                 }
             };
 
-            SaveProfile(taiwanEInvoice).Wait();
-            SaveProfile(generalReceipt).Wait();
+            SaveProfile(taiwanEInvoice);
+            SaveProfile(generalReceipt);
         }
     }
 
@@ -111,7 +111,7 @@ public class ProfileManager
         {
             try
             {
-                var profile = LoadProfile(Path.GetFileNameWithoutExtension(filePath)).Result;
+                var profile = LoadProfile(Path.GetFileNameWithoutExtension(filePath));
                 if (profile != null)
                 {
                     profiles.Add(profile);
@@ -129,7 +129,7 @@ public class ProfileManager
     /// <summary>
     /// 載入 Profile
     /// </summary>
-    public async Task<FieldSetProfile?> LoadProfile(string profileId)
+    public FieldSetProfile? LoadProfile(string profileId)
     {
         var filePath = Path.Combine(_profilesDirectory, $"{profileId}.json");
         
@@ -138,7 +138,7 @@ public class ProfileManager
 
         try
         {
-            var json = await File.ReadAllTextAsync(filePath);
+            var json = File.ReadAllText(filePath);
             return JsonSerializer.Deserialize<FieldSetProfile>(json, _jsonOptions);
         }
         catch
@@ -150,7 +150,7 @@ public class ProfileManager
     /// <summary>
     /// 儲存 Profile
     /// </summary>
-    public async Task SaveProfile(FieldSetProfile profile)
+    public void SaveProfile(FieldSetProfile profile)
     {
         if (string.IsNullOrWhiteSpace(profile.ProfileId))
         {
@@ -165,7 +165,7 @@ public class ProfileManager
 
         var filePath = Path.Combine(_profilesDirectory, $"{profile.ProfileId}.json");
         var json = JsonSerializer.Serialize(profile, _jsonOptions);
-        await File.WriteAllTextAsync(filePath, json);
+        File.WriteAllText(filePath, json);
     }
 
     /// <summary>
