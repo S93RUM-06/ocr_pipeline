@@ -7,7 +7,7 @@
         x:Class="RoiSampler.App.Views.ProfileManagerWindow"
         x:DataType="vm:ProfileManagerViewModel"
         Title="Profile 管理"
-        Width="900" Height="600">
+        Width="1400" Height="900">
 
     <Design.DataContext>
         <vm:ProfileManagerViewModel/>
@@ -118,10 +118,13 @@
                                             Width="100"/>
                         <DataGridCheckBoxColumn Header="必填" 
                                                 Binding="{Binding Required}" 
-                                                Width="60"/>
+                                                Width="70"/>
                         <DataGridTextColumn Header="正則表達式" 
                                             Binding="{Binding Pattern}" 
                                             Width="150"/>
+                        <DataGridTextColumn Header="說明" 
+                                            Binding="{Binding Description}" 
+                                            Width="250"/>
                         <DataGridTemplateColumn Header="操作" Width="80">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
