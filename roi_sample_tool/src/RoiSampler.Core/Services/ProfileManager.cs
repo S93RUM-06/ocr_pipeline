@@ -60,6 +60,15 @@ public class ProfileManager
             // 🔧 使用屬性賦值而非集合初始化器
             taiwanEInvoice.Fields.Add(new FieldDefinition
             {
+                FieldName = "year_month",
+                DisplayName = "發票年月",
+                DataType = "string",
+                Required = true,
+                Description = "中民國年，二個月為一發票周期"
+            });
+
+            taiwanEInvoice.Fields.Add(new FieldDefinition
+            {
                 FieldName = "invoice_number",
                 DisplayName = "發票號碼",
                 DataType = "string",
@@ -75,7 +84,26 @@ public class ProfileManager
                 DisplayName = "發票日期",
                 DataType = "date",
                 Required = true,
-                Description = "開立日期"
+                Description = "開立日期時間"
+            });
+
+            taiwanEInvoice.Fields.Add(new FieldDefinition
+            {
+                FieldName = "random_code",
+                DisplayName = "隨機碼",
+                DataType = "string",
+                Pattern = "\\d{4}",
+                ExpectedLength = 4,
+                Description = "4位隨機碼"
+            });
+
+            taiwanEInvoice.Fields.Add(new FieldDefinition
+            {
+                FieldName = "total_amount",
+                DisplayName = "總金額",
+                DataType = "number",
+                Required = true,
+                Description = "含稅總額"
             });
 
             taiwanEInvoice.Fields.Add(new FieldDefinition
@@ -98,98 +126,64 @@ public class ProfileManager
                 Description = "買受人統一編號（8碼）"
             });
 
-            taiwanEInvoice.Fields.Add(new FieldDefinition
-            {
-                FieldName = "total_amount",
-                DisplayName = "總金額",
-                DataType = "number",
-                Required = true,
-                Description = "含稅總額"
-            });
-
-            taiwanEInvoice.Fields.Add(new FieldDefinition
-            {
-                FieldName = "random_code",
-                DisplayName = "隨機碼",
-                DataType = "string",
-                Pattern = "\\d{4}",
-                ExpectedLength = 4,
-                Description = "4位隨機碼"
-            });
-
-            taiwanEInvoice.Fields.Add(new FieldDefinition
-            {
-                FieldName = "qrcode_left",
-                DisplayName = "QR Code (左)",
-                DataType = "string",
-                Description = "左側 QR Code"
-            });
-
-            taiwanEInvoice.Fields.Add(new FieldDefinition
-            {
-                FieldName = "qrcode_right",
-                DisplayName = "QR Code (右)",
-                DataType = "string",
-                Description = "右側 QR Code"
-            });
-
-            // 🔧 建立預設 Profile：一般收據
-            var generalReceipt = new FieldSetProfile
-            {
-                ProfileId = "general_receipt_v1",
-                ProfileName = "一般收據",
-                Description = "一般商業收據常見欄位",
-                DocumentType = "receipt",
-                Tags = new List<string> { "收據", "通用" }
-            };
-
-            generalReceipt.Fields.Add(new FieldDefinition
-            {
-                FieldName = "receipt_number",
-                DisplayName = "收據編號",
-                DataType = "string",
-                Required = true
-            });
-
-            generalReceipt.Fields.Add(new FieldDefinition
-            {
-                FieldName = "receipt_date",
-                DisplayName = "收據日期",
-                DataType = "date",
-                Required = true
-            });
-
-            generalReceipt.Fields.Add(new FieldDefinition
-            {
-                FieldName = "payer_name",
-                DisplayName = "付款人",
-                DataType = "string"
-            });
-
-            generalReceipt.Fields.Add(new FieldDefinition
-            {
-                FieldName = "total_amount",
-                DisplayName = "總金額",
-                DataType = "number",
-                Required = true
-            });
-
-            generalReceipt.Fields.Add(new FieldDefinition
-            {
-                FieldName = "payment_method",
-                DisplayName = "付款方式",
-                DataType = "string"
-            });
-
-            generalReceipt.Fields.Add(new FieldDefinition
-            {
-                FieldName = "description",
-                DisplayName = "項目說明",
-                DataType = "string"
-            });
-
             SaveProfile(taiwanEInvoice);
-            SaveProfile(generalReceipt);
+
+            //// 🔧 建立預設 Profile：一般收據
+            //var generalReceipt = new FieldSetProfile
+            //{
+            //    ProfileId = "general_receipt_v1",
+            //    ProfileName = "一般收據",
+            //    Description = "一般商業收據常見欄位",
+            //    DocumentType = "receipt",
+            //    Tags = new List<string> { "收據", "通用" }
+            //};
+
+            //generalReceipt.Fields.Add(new FieldDefinition
+            //{
+            //    FieldName = "receipt_number",
+            //    DisplayName = "收據編號",
+            //    DataType = "string",
+            //    Required = true
+            //});
+
+            //generalReceipt.Fields.Add(new FieldDefinition
+            //{
+            //    FieldName = "receipt_date",
+            //    DisplayName = "收據日期",
+            //    DataType = "date",
+            //    Required = true
+            //});
+
+            //generalReceipt.Fields.Add(new FieldDefinition
+            //{
+            //    FieldName = "payer_name",
+            //    DisplayName = "付款人",
+            //    DataType = "string"
+            //});
+
+            //generalReceipt.Fields.Add(new FieldDefinition
+            //{
+            //    FieldName = "total_amount",
+            //    DisplayName = "總金額",
+            //    DataType = "number",
+            //    Required = true
+            //});
+
+            //generalReceipt.Fields.Add(new FieldDefinition
+            //{
+            //    FieldName = "payment_method",
+            //    DisplayName = "付款方式",
+            //    DataType = "string"
+            //});
+
+            //generalReceipt.Fields.Add(new FieldDefinition
+            //{
+            //    FieldName = "description",
+            //    DisplayName = "項目說明",
+            //    DataType = "string"
+            //});
+
+            //SaveProfile(generalReceipt);
         }
     }
 
