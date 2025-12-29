@@ -21,7 +21,7 @@ OCR Pipeline 是一個工程級的 OCR（光學字元識別）系統，提供完
 1. **Pipeline 與 OCR Engine 解耦**
 2. **Config-driven（設定驅動）**
 3. **模組可插拔**
-4. **統一範本格式**：透過 `anchor.enable` 支援兩種定位模式
+4. **統一範本格式**：新版 v1.0 schema，regions 為 dict，欄位皆用 rect_ratio 相對座標描述
 5. **所有中間結果可追蹤**
 6. **可因應多文件版型**
 
@@ -83,7 +83,7 @@ for item in results:
 
 ## 📚 範本系統
 
-本專案採用**統一範本格式**，支援兩種定位模式：
+本專案採用**統一新版 v1.0 範本格式**，所有欄位皆以 metadata + regions dict 結構描述，完全符合 template-v1.0.json schema：
 
 ### 🎯 相對座標模式（推薦）
 
@@ -156,7 +156,7 @@ for item in results:
 
 - ✅ 架構設計完成
 - ✅ PaddleOCR 3.3.2 CPU 版本整合
-- ✅ 統一範本格式設計與實作
+- ✅ 新版 v1.0 schema 範本格式設計與實作
 - ✅ Template Validator（支援雙模式）
 - ✅ 台灣電子發票範本（Anchor-based）
 - ✅ 測試覆蓋率 91%（201/202 測試通過）
@@ -167,6 +167,7 @@ for item in results:
 
 ```bash
 # 執行所有測試
+# 執行所有測試
 wsl -e bash -c "cd /mnt/d/source/ocr_pipeline && ~/miniconda3/envs/ocr_pipeline/bin/python -m pytest tests/ -v"
 
 # 執行特定測試
@@ -174,18 +175,14 @@ pytest tests/test_template_validator.py -v
 
 # 顯示覆蓋率
 pytest tests/ --cov=ocr_pipeline --cov-report=html
+# 顯示覆蓋率
+wsl -e bash -c "cd /mnt/d/source/ocr_pipeline && ~/miniconda3/envs/ocr_pipeline/bin/python -m pytest tests/ --cov=ocr_pipeline --cov-report=html"
 ```
 
 **測試統計**：
-- 總測試數：202
-- 通過：201 (99.5%)
-- 失敗：1（已知問題：grayscale 測試）
-- 覆蓋率：91%
 
 ## 🎯 範例程式
 
-- [examples/quick_ocr_test.py](examples/quick_ocr_test.py) - 快速 OCR 測試
-- [examples/taiwan_einvoice_demo.py](examples/taiwan_einvoice_demo.py) - 台灣電子發票完整示範
 
 ## 📄 授權
 

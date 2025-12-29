@@ -1,0 +1,194 @@
+{
+  "template_id": "tw_einvoice_v1_template",
+  "template_name": "台灣電子發票證明聯 範本",
+  "version": "1.0.0",
+  "created_at": "2025-12-27",
+  "updated_at": null,
+  "description": "從 2 個樣本計算產生",
+  "processing_strategy": "hybrid_ocr_roi",
+  "sampling_metadata": {
+    "sample_count": 2,
+    "reference_size": {
+      "width": 1200,
+      "height": 1915,
+      "unit": "pixel",
+      "description": "2張樣本圖片的中位數大小"
+    },
+    "size_range": {
+      "width": {
+        "min": 1200,
+        "max": 1200
+      },
+      "height": {
+        "min": 1904,
+        "max": 1927
+      }
+    },
+    "sampling_date": "2025-12-27",
+    "sampler_version": "1.0.0",
+    "notes": null
+  },
+  "regions": {
+    "year_month": {
+      "rect_ratio": {
+        "x": 0.1642,
+        "y": 0.3718,
+        "width": 0.6562,
+        "height": 0.0758
+      },
+      "rect_std_dev": {
+        "x": 0.0094,
+        "y": 0.0076,
+        "width": 0.0018,
+        "height": 0.0036
+      },
+      "pattern": null,
+      "extract_group": 0,
+      "expected_length": null,
+      "required": false,
+      "position_weight": 0.3,
+      "tolerance_ratio": 0.2,
+      "fallback_pattern": null,
+      "data_type": "string",
+      "description": null
+    },
+    "invoice_number": {
+      "rect_ratio": {
+        "x": 0.18,
+        "y": 0.4487,
+        "width": 0.625,
+        "height": 0.0715
+      },
+      "rect_std_dev": {
+        "x": 0.0047,
+        "y": 0.0057,
+        "width": 0.0378,
+        "height": 0.0028
+      },
+      "pattern": null,
+      "extract_group": 0,
+      "expected_length": null,
+      "required": false,
+      "position_weight": 0.3,
+      "tolerance_ratio": 0.2,
+      "fallback_pattern": null,
+      "data_type": "string",
+      "description": null
+    },
+    "invoice_date": {
+      "rect_ratio": {
+        "x": 0.0588,
+        "y": 0.5257,
+        "width": 0.5225,
+        "height": 0.0433
+      },
+      "rect_std_dev": {
+        "x": 0.0006,
+        "y": 0.0037,
+        "width": 0.0153,
+        "height": 0.0055
+      },
+      "pattern": null,
+      "extract_group": 0,
+      "expected_length": null,
+      "required": false,
+      "position_weight": 0.3,
+      "tolerance_ratio": 0.2,
+      "fallback_pattern": null,
+      "data_type": "string",
+      "description": null
+    },
+    "random_code": {
+      "rect_ratio": {
+        "x": 0.0688,
+        "y": 0.5682,
+        "width": 0.3829,
+        "height": 0.037
+      },
+      "rect_std_dev": {
+        "x": 0.0124,
+        "y": 0.0022,
+        "width": 0.0854,
+        "height": 0.0042
+      },
+      "pattern": null,
+      "extract_group": 0,
+      "expected_length": null,
+      "required": false,
+      "position_weight": 0.3,
+      "tolerance_ratio": 0.2,
+      "fallback_pattern": null,
+      "data_type": "string",
+      "description": null
+    },
+    "total_amount": {
+      "rect_ratio": {
+        "x": 0.5279,
+        "y": 0.5659,
+        "width": 0.3825,
+        "height": 0.041
+      },
+      "rect_std_dev": {
+        "x": 0.0288,
+        "y": 0.0004,
+        "width": 0.0153,
+        "height": 0.0008
+      },
+      "pattern": null,
+      "extract_group": 0,
+      "expected_length": null,
+      "required": false,
+      "position_weight": 0.3,
+      "tolerance_ratio": 0.2,
+      "fallback_pattern": null,
+      "data_type": "string",
+      "description": null
+    },
+    "seller_tax_id": {
+      "rect_ratio": {
+        "x": 0.07,
+        "y": 0.6038,
+        "width": 0.4408,
+        "height": 0.0392
+      },
+      "rect_std_dev": {
+        "x": 0.0059,
+        "y": 0.0063,
+        "width": 0.0106,
+        "height": 0.0056
+      },
+      "pattern": null,
+      "extract_group": 0,
+      "expected_length": null,
+      "required": false,
+      "position_weight": 0.3,
+      "tolerance_ratio": 0.2,
+      "fallback_pattern": null,
+      "data_type": "string",
+      "description": null
+    },
+    "buyer_tax_id": {
+      "rect_ratio": {
+        "x": 0.5279,
+        "y": 0.6051,
+        "width": 0.3721,
+        "height": 0.036
+      },
+      "rect_std_dev": {
+        "x": 0.0313,
+        "y": 0.0052,
+        "width": 0.0218,
+        "height": 0.0071
+      },
+      "pattern": null,
+      "extract_group": 0,
+      "expected_length": null,
+      "required": false,
+      "position_weight": 0.3,
+      "tolerance_ratio": 0.2,
+      "fallback_pattern": null,
+      "data_type": "string",
+      "description": null
+    }
+  }
+}
